@@ -9,18 +9,6 @@ output:
 ## Loading and preprocessing the data
 
 ```r
-require(xtable)
-```
-
-```
-## Loading required package: xtable
-```
-
-```
-## Warning: package 'xtable' was built under R version 3.3.3
-```
-
-```r
 require(knitr)
 ```
 
@@ -30,6 +18,14 @@ require(knitr)
 
 ```
 ## Warning: package 'knitr' was built under R version 3.3.3
+```
+
+```r
+require(ggplot2)
+```
+
+```
+## Loading required package: ggplot2
 ```
 
 
@@ -53,8 +49,7 @@ aggSteps <- tapply(activity$steps,activity$date,sum,na.rm=TRUE)
 
 
 ```r
-hist(aggSteps, breaks = 10, xlab = "Number of Steps", 
-     main = "Total Number of Steps Taken in a Day")
+qplot(aggSteps, bins = 9, xlab = "Number of Steps", main = "Total Number of Steps Taken in a Day")
 ```
 
 ![](PA1_template_files/figure-html/stepshistogram-1.png)<!-- -->
@@ -70,7 +65,27 @@ steps taken per day is 10395.
 
 ## What is the average daily activity pattern?
 
+```r
+intSteps <- tapply(activity$steps,activity$interval,mean,na.rm=TRUE)
+```
 
+
+```r
+plot(names(intSteps),intSteps,type = "l", col = "blue", 
+     xlab = "Interval (minutes)", ylab = "Number of Steps", 
+     main = "Average Number of Steps in Each 5 Minute Inerval")
+```
+
+![](PA1_template_files/figure-html/plotsteps-1.png)<!-- -->
+
+
+```r
+maxSteps <- max(intSteps)
+maxInt <- names(intSteps[which(intSteps == maxSteps)])
+```
+
+The interval with the most average steps is 835 during which an average
+of 206.1698113 are taken.
 
 ## Imputing missing values
 

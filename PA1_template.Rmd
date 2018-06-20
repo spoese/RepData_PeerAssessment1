@@ -9,6 +9,7 @@ output:
 ## Loading and preprocessing the data
 ```{r packages}
 require(knitr)
+require(ggplot2)
 ```
 
 ```{r loaddata}
@@ -28,8 +29,7 @@ aggSteps <- tapply(activity$steps,activity$date,sum,na.rm=TRUE)
 ```
 
 ```{r stepshistogram}
-hist(aggSteps, breaks = 10, xlab = "Number of Steps", 
-     main = "Total Number of Steps Taken in a Day")
+qplot(aggSteps, bins = 9, xlab = "Number of Steps", main = "Total Number of Steps Taken in a Day")
 ```
 
 ```{r avesteps}
@@ -41,8 +41,23 @@ The mean number of steps taken per day is `r meanSteps` and the median number of
 steps taken per day is `r medianSteps`.
 
 ## What is the average daily activity pattern?
+```{r intervalsteps}
+intSteps <- tapply(activity$steps,activity$interval,mean,na.rm=TRUE)
+```
 
+```{r plotsteps}
+plot(names(intSteps),intSteps,type = "l", col = "blue", 
+     xlab = "Interval (minutes)", ylab = "Number of Steps", 
+     main = "Average Number of Steps in Each 5 Minute Inerval")
+```
 
+```{r maxinterval}
+maxSteps <- max(intSteps)
+maxInt <- names(intSteps[which(intSteps == maxSteps)])
+```
+
+The interval with the most average steps is `r maxInt` during which an average
+of `r maxSteps` are taken.
 
 ## Imputing missing values
 
