@@ -14,6 +14,7 @@ options(scipen = 1, digits = 2)
 ```{r packages}
 require(knitr)
 require(ggplot2)
+require(dplyr)
 ```
 
 ```{r loaddata}
@@ -51,9 +52,10 @@ intSteps <- tapply(activity$steps,activity$interval,mean,na.rm=TRUE)
 ```
 
 ```{r plotsteps}
-plot(names(intSteps),intSteps,type = "l", col = "blue", 
+qplot(as.numeric(names(intSteps)),intSteps, 
      xlab = "Interval (minutes)", ylab = "Number of Steps", 
-     main = "Average Number of Steps in Each 5 Minute Inerval")
+     main = "Average Number of Steps in Each 5 Minute Inerval") + 
+        geom_line(col = "blue", size = 2)
 ```
 
 ```{r maxinterval}
@@ -117,3 +119,13 @@ there were some days where all of the values were NA and thus were summed to 0
 before. Those days will be right on the mean number of steps now.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+```{r weekdays}
+newAct <- mutate(newAct,
+                 type = as.factor(ifelse(weekdays(date) %in% 
+                                                 c("Saturday","Sunday"),
+                                         "weekend","weekday")))
+```
+
+```{r weekdayplot}
+qplot(as.numeric(names(newAggSteps)),newAggSteps,facets = type.~, geom = "line")
+```

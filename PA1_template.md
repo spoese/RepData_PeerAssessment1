@@ -33,6 +33,31 @@ require(ggplot2)
 ## Loading required package: ggplot2
 ```
 
+```r
+require(dplyr)
+```
+
+```
+## Loading required package: dplyr
+```
+
+```
+## 
+## Attaching package: 'dplyr'
+```
+
+```
+## The following objects are masked from 'package:stats':
+## 
+##     filter, lag
+```
+
+```
+## The following objects are masked from 'package:base':
+## 
+##     intersect, setdiff, setequal, union
+```
+
 
 ```r
 if(!file.exists("activity.csv")) {
@@ -77,9 +102,10 @@ intSteps <- tapply(activity$steps,activity$interval,mean,na.rm=TRUE)
 
 
 ```r
-plot(names(intSteps),intSteps,type = "l", col = "blue", 
+qplot(as.numeric(names(intSteps)),intSteps, 
      xlab = "Interval (minutes)", ylab = "Number of Steps", 
-     main = "Average Number of Steps in Each 5 Minute Inerval")
+     main = "Average Number of Steps in Each 5 Minute Inerval") + 
+        geom_line(col = "blue", size = 2)
 ```
 
 ![](PA1_template_files/figure-html/plotsteps-1.png)<!-- -->
@@ -161,3 +187,13 @@ there were some days where all of the values were NA and thus were summed to 0
 before. Those days will be right on the mean number of steps now.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+```r
+newAct <- mutate(newAct,
+                 weekday.type = 
+                         as.factor(
+                                 ifelse(weekdays(date) %in% 
+                                                c("Saturday","Sunday"),
+                                "weekend","weekday")))
+```
+
