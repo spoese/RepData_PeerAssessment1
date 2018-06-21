@@ -96,7 +96,8 @@ any `NA`'s for now.
 
 ```r
 qplot(aggSteps, bins = 9, xlab = "Number of Steps", 
-      main = "Total Number of Steps Taken in a Day")
+      main = "Total Number of Steps Taken in a Day", col = I("black"),
+      fill = I("red"))
 ```
 
 ![](PA1_template_files/figure-html/stepshistogram-1.png)<!-- -->
@@ -201,7 +202,8 @@ newAggSteps <- tapply(newAct$steps,newAct$date,sum,na.rm=TRUE)
 
 ```r
 qplot(newAggSteps, bins = 9, xlab = "Number of Steps", 
-      main = "Total Number of Steps Taken in a Day (NA's Imputed")
+      main = "Total Number of Steps Taken in a Day (NA's Imputed", 
+      col = I("black"), fill = I("red"))
 ```
 
 ![](PA1_template_files/figure-html/allstepshistogram-1.png)<!-- -->

@@ -51,7 +51,8 @@ any `NA`'s for now.
 
 ```{r stepshistogram}
 qplot(aggSteps, bins = 9, xlab = "Number of Steps", 
-      main = "Total Number of Steps Taken in a Day")
+      main = "Total Number of Steps Taken in a Day", col = I("black"),
+      fill = I("red"))
 ```
 
 When given only one variable, `qplot()` creates a histogram. 9 bins were chosen
@@ -136,7 +137,8 @@ newAggSteps <- tapply(newAct$steps,newAct$date,sum,na.rm=TRUE)
 
 ```{r allstepshistogram}
 qplot(newAggSteps, bins = 9, xlab = "Number of Steps", 
-      main = "Total Number of Steps Taken in a Day (NA's Imputed")
+      main = "Total Number of Steps Taken in a Day (NA's Imputed", 
+      col = I("black"), fill = I("red"))
 ```
 
 These two steps are equivalent to those taken before, just with all of the `NA`
