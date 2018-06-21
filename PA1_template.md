@@ -12,6 +12,9 @@ output:
 options(scipen = 1, digits = 2)
 ```
 
+This first line simply insures that any numbers that may be printed using
+scientific notation are printed in standard form instead.
+
 
 ```r
 require(knitr)
@@ -58,6 +61,8 @@ require(dplyr)
 ##     intersect, setdiff, setequal, union
 ```
 
+Here we have all packages that are required for the analysis.
+
 
 ```r
 if(!file.exists("activity.csv")) {
@@ -66,16 +71,27 @@ if(!file.exists("activity.csv")) {
 activity <- read.csv("activity.csv")
 ```
 
+Now we begin to actually load the data. We check to see if the file has already
+been unzipped, and if it has not, we unzip the file. Then the file is read into
+the `activity` variable using `read.csv()`.
+
 
 ```r
 activity$date <- as.Date(activity$date, "%Y-%m-%d")
 ```
+
+Lastly, since it will be important in order to answer future questions, we
+reformat the `date` column of the `activity` data frame to be in the date
+format.
 
 ## What is mean total number of steps taken per day?
 
 ```r
 aggSteps <- tapply(activity$steps,activity$date,sum,na.rm=TRUE)
 ```
+
+First, we can use `tapply()` to sum up the number of steps in each day, removing
+any `NA`'s for now.
 
 
 ```r
@@ -84,6 +100,10 @@ qplot(aggSteps, bins = 9, xlab = "Number of Steps",
 ```
 
 ![](PA1_template_files/figure-html/stepshistogram-1.png)<!-- -->
+
+When given only one variable, `qplot()` creates a histogram. 9 bins were chosen
+in order to give a clear overall picture of the data. Here we see quite a few
+days in the lowest bin, likely due to days with many or all `NA`'s.
 
 
 ```r
@@ -100,6 +120,9 @@ steps taken per day is 10395.
 intSteps <- tapply(activity$steps,activity$interval,mean,na.rm=TRUE)
 ```
 
+Here, `tapply()` is used again, but this time to average the number of steps
+and this time based on the interval instead of the day (again removing `NA`'s).
+
 
 ```r
 qplot(as.numeric(names(intSteps)),intSteps, 
@@ -110,6 +133,11 @@ qplot(as.numeric(names(intSteps)),intSteps,
 
 ![](PA1_template_files/figure-html/plotsteps-1.png)<!-- -->
 
+`tapply()` gives an array where we have a vector of averages, and each element
+is given its respective interval as a name. Thus the names of `intSteps` are
+used as the independent variable and the calculated means are used as the
+dependent variable to create this time series graph.
+
 
 ```r
 maxSteps <- max(intSteps)
@@ -117,7 +145,7 @@ maxInt <- names(intSteps[which(intSteps == maxSteps)])
 ```
 
 The interval with the most average steps is 835 during which an average
-of 206.17 are taken.
+of 206.17 steps are taken.
 
 ## Imputing missing values
 
@@ -134,30 +162,36 @@ colSums(is.na(activity))
 countNA <- sum(is.na(activity$steps))
 ```
 
-There are 2304 observations that have an NA value listed.
+There are 2304 observations that have an `NA` value listed. We see that
+the `steps` column is the only one that has any `NA` values at all.
 
-In order to account for activity in intervals nearby to a missing value and for
-usual movement at a given time of day, we find the mean of the intervals
-immediately before and after the missing interval and find the mean of the
-given interval across all days in the dataset. We then take the mean of these
-two numbers to replace the NA value with. If both values around the interval
-are also NA, the value is computed from the daily interval mean only.
 
 ```r
 modAct <- activity$steps
 modAct[c(1,17568)] <- intSteps[c(1,288)]
 for (i in 2:17567){
         if (is.na(modAct[i])){
-                near <- mean(c(activity$steps[i-1],activity$steps[i+1]))
+                near <- mean(c(activity$steps[i-1], activity$steps[i+1]))
                 if (is.na(near))
-                        modAct[i] <- intSteps[which(activity$interval[i]==names(intSteps))]
+                        modAct[i] <- intSteps[which(activity$interval[i] == names(intSteps))]
                 else
-                        modAct[i] <- mean(c(near,intSteps[which(activity$interval[i]==names(intSteps))]))
+                        modAct[i] <- mean(c(near, intSteps[which(activity$interval[i] == names(intSteps))]))
         }
 }
 newAct <- activity
 newAct$steps <- modAct
 ```
+
+In order to account for activity in intervals nearby to a missing value and for
+usual movement at a given time of day, we find the mean of the intervals
+immediately before and after the missing interval and find the mean of the
+given interval across all days in the dataset. We then take the mean of these
+two numbers to replace the `NA` value with. If both values around the interval
+are also `NA`, the value is computed from the daily interval mean only.  
+NOTE: Since the code inside the `for` loop will be invalid for `i in c(1,288)`, 
+those two spots are manually calculated outside of the `for` loop. Each of the 
+values are surrounded by `NA`'s and thus are recalculated using the mean of 
+their respective intervals.
 
 
 ```r
@@ -172,6 +206,11 @@ qplot(newAggSteps, bins = 9, xlab = "Number of Steps",
 
 ![](PA1_template_files/figure-html/allstepshistogram-1.png)<!-- -->
 
+These two steps are equivalent to those taken before, just with all of the `NA`
+values having been imputed. Here we see fewer values in the lowest bin since the
+days that were mostly or all `NA` have now been replaced by actual values. This
+gives the distribution a more normal shape.
+
 
 ```r
 meanNewSteps <- mean(newAggSteps)
@@ -180,20 +219,47 @@ medianNewSteps <-median(newAggSteps)
 
 The mean number of steps taken per day is 10766.19 and the median number
 of steps taken per day is 10766.19. It is clear that both the mean and
-the median number of steps has increased when replacing the NA values. Obviously
-adding in more values will only increase the estimates of total daily number of
-steps. A side effect is that it has made the distribution more normal since
-there were some days where all of the values were NA and thus were summed to 0
-before. Those days will be right on the mean number of steps now.
+the median number of steps has increased when replacing the `NA` values. 
+Obviously adding in more values will only increase the estimates of total daily 
+number of steps.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
 ```r
 newAct <- mutate(newAct,
-                 weekday.type = 
-                         as.factor(
-                                 ifelse(weekdays(date) %in% 
-                                                c("Saturday","Sunday"),
-                                "weekend","weekday")))
+                 type = as.factor(ifelse(weekdays(date) %in% c("Saturday","Sunday"), "weekend", "weekday")))
 ```
 
+First, a new factor variable is created that checks which day of the week the
+observation ocurred during and assigns the new variable a level of either
+`"weekend"` or `"weekday"`.
+
+
+```r
+weekdayAct <- filter(newAct, type == "weekday")
+weekendAct <- filter(newAct, type == "weekend")
+weekdayInt <- tapply(weekdayAct$steps, weekdayAct$interval, mean)
+weekendInt <- tapply(weekendAct$steps, weekendAct$interval, mean)
+```
+
+First, the `newAct` data frame is filtered into two new data frames based on
+type of day (weekday/weekend). Then, just as before, the number of steps are
+averaged by interval.
+
+
+```r
+par(mfrow = c(2,1), mar = c(2,1,1,1), oma = c(4,4,2,0))
+rng <- range(c(weekendInt,weekdayInt))
+plot(as.numeric(names(weekendInt)), weekendInt, xlab = "", ylab = "",
+     main = "Weekend", type = "l", col = "blue", ylim = rng)
+plot(as.numeric(names(weekdayInt)), weekdayInt, xlab = "", ylab = "",
+     main = "Weekday", type = "l", col = "blue", ylim = rng)
+mtext("Interval", side = 1, outer = TRUE, line = 0)
+mtext("Number of steps",side = 2, outer = TRUE, line = 2)
+```
+
+![](PA1_template_files/figure-html/weekdayplots-1.png)<!-- -->
+
+The data is then plotted as a time series as before, using the `rng` variable
+to insure that each plot has the same `ylim` argument. This allows for an easier
+comparison between the two plots.
